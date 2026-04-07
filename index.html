@@ -264,11 +264,7 @@
   }
 
   /* Exercise figure area */
-  .exercise-figure {
-    font-size: 80px;
-    margin-bottom: 16px;
-    line-height: 1;
-  }
+  /* exercise-figure styled in SVG section below */
 
   .exercise-title {
     font-size: 28px;
@@ -563,6 +559,169 @@
     color: var(--text-dim);
   }
 
+  /* ========== EXERCISE FIGURE SVG ========== */
+  .exercise-figure {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 16px;
+    color: var(--text);
+    opacity: 0.9;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .exercise-figure svg {
+    width: 100%;
+    height: 100%;
+  }
+  .exercise-figure.rest-fig {
+    opacity: 0.4;
+  }
+  .exercise-figure.pulse-anim {
+    animation: figPulse 1s ease-in-out infinite alternate;
+  }
+  @keyframes figPulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.03); }
+  }
+
+  /* ========== EXERCISE PREVIEW LIST ========== */
+  .preview-list {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 16px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .preview-list.open {
+    max-height: 1200px;
+  }
+  .preview-toggle {
+    background: var(--surface2);
+    border: none;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: all 0.2s;
+  }
+  .preview-toggle:hover { background: var(--exercise); color: #fff; }
+
+  .preview-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    transition: background 0.2s;
+  }
+  .preview-item:hover { background: var(--surface2); }
+  .preview-item-num {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--exercise);
+    width: 22px;
+    text-align: center;
+  }
+  .preview-item-fig {
+    width: 44px;
+    height: 44px;
+    color: var(--text);
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+  .preview-item-fig svg { width: 100%; height: 100%; }
+  .preview-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+  }
+  .preview-item-dur {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  /* ========== PROGRESS BAR (workout screen) ========== */
+  .workout-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--ring-bg);
+  }
+  .workout-progress-fill {
+    height: 100%;
+    background: var(--exercise);
+    transition: width 0.3s ease, background 0.3s;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* ========== NEXT EXERCISE PREVIEW (workout screen) ========== */
+  .next-preview-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    min-height: 60px;
+    width: 100%;
+    max-width: 320px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .next-preview-fig {
+    width: 40px;
+    height: 40px;
+    color: var(--text);
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+  .next-preview-fig svg { width: 100%; height: 100%; }
+  .next-preview-text {
+    flex: 1;
+  }
+  .next-preview-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .next-preview-name {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  /* ========== MUSCLE TAGS ========== */
+  .muscle-tags {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .muscle-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(255,107,53,0.15);
+    color: var(--exercise);
+  }
+  .muscle-tag.rest-tag {
+    background: rgba(0,180,216,0.15);
+    color: var(--rest);
+  }
+
   /* ========== RESPONSIVE ========== */
   @media (max-width: 380px) {
     .hero-title { font-size: 36px; }
@@ -662,12 +821,13 @@
 
 <!-- ==================== WORKOUT SCREEN ==================== -->
 <div id="workout">
+  <div class="workout-progress"><div class="workout-progress-fill" id="workoutProgressFill" style="width:0%"></div></div>
   <div class="workout-header">
     <button class="back-btn" onclick="exitWorkout()">✕</button>
     <div class="exercise-counter" id="exCounter">1 of 12</div>
   </div>
 
-  <div class="exercise-figure" id="exFigure">🏃</div>
+  <div class="exercise-figure pulse-anim" id="exFigure"></div>
 
   <div class="timer-container">
     <svg class="timer-ring" viewBox="0 0 300 300">
@@ -683,10 +843,16 @@
   </div>
 
   <div class="exercise-title" id="exTitle">Jumping Jacks</div>
+  <div class="muscle-tags" id="muscleTags"></div>
   <div class="exercise-instruction" id="exInstruction"></div>
 
-  <div class="next-up" id="nextUpLabel">NEXT UP</div>
-  <div class="next-name" id="nextUpName"></div>
+  <div class="next-preview-card" id="nextPreviewCard">
+    <div class="next-preview-fig" id="nextPreviewFig"></div>
+    <div class="next-preview-text">
+      <div class="next-preview-label">NEXT UP</div>
+      <div class="next-preview-name" id="nextPreviewName"></div>
+    </div>
+  </div>
 
   <div class="controls">
     <button class="ctrl-btn" onclick="prevExercise()" title="Previous">⏮</button>
@@ -789,75 +955,76 @@
   </div>
 </div>
 
+<script src="exercises.js"></script>
 <script>
 // ==================== EXERCISE DATA ====================
 const WORKOUTS = {
   classic: {
     name: 'The Original 7-Minute',
     exercises: [
-      { name: 'Jumping Jacks',       icon: '⭐', instruction: 'Jump feet wide, arms overhead. Return to center. Keep a steady pace.' },
-      { name: 'Wall Sit',            icon: '🧱', instruction: 'Back flat against wall, knees at 90°. Hold steady. Breathe.' },
-      { name: 'Push-Ups',            icon: '💪', instruction: 'Chest to floor, push back up. Keep core tight, body straight.' },
-      { name: 'Crunches',            icon: '🔥', instruction: 'Knees bent, curl shoulders off floor. Exhale on the way up.' },
-      { name: 'Step-Up onto Chair',  icon: '🪑', instruction: 'Step up with one foot, drive knee up. Alternate legs each rep.' },
-      { name: 'Squats',              icon: '🦵', instruction: 'Feet shoulder-width, sit back and down. Knees track over toes.' },
-      { name: 'Tricep Dips',         icon: '💺', instruction: 'Hands on chair edge, lower body by bending elbows. Press back up.' },
-      { name: 'Plank',               icon: '🧘', instruction: 'Forearms on floor, body straight. Squeeze core. Don\'t let hips sag.' },
-      { name: 'High Knees',          icon: '🏃', instruction: 'Run in place, driving knees to chest height. Pump your arms.' },
-      { name: 'Lunges',              icon: '🦿', instruction: 'Step forward, lower back knee toward floor. Alternate legs.' },
-      { name: 'Push-Up & Rotate',    icon: '🌀', instruction: 'Push-up, then rotate to side plank. Alternate sides each rep.' },
-      { name: 'Side Plank',          icon: '📐', instruction: 'Forearm on floor, hips up, body straight. Switch sides halfway.' },
+      { name: 'Jumping Jacks',       muscles: ['Cardio','Full Body'],        instruction: 'Jump feet wide, arms overhead. Return to center. Keep a steady pace.' },
+      { name: 'Wall Sit',            muscles: ['Quads','Glutes'],            instruction: 'Back flat against wall, knees at 90°. Hold steady. Breathe.' },
+      { name: 'Push-Ups',            muscles: ['Chest','Triceps','Core'],    instruction: 'Chest to floor, push back up. Keep core tight, body straight.' },
+      { name: 'Crunches',            muscles: ['Abs'],                       instruction: 'Knees bent, curl shoulders off floor. Exhale on the way up.' },
+      { name: 'Step-Up onto Chair',  muscles: ['Quads','Glutes','Cardio'],   instruction: 'Step up with one foot, drive knee up. Alternate legs each rep.' },
+      { name: 'Squats',              muscles: ['Quads','Glutes','Hamstrings'],instruction: 'Feet shoulder-width, sit back and down. Knees track over toes.' },
+      { name: 'Tricep Dips',         muscles: ['Triceps','Shoulders'],       instruction: 'Hands on chair edge, lower body by bending elbows. Press back up.' },
+      { name: 'Plank',               muscles: ['Core','Shoulders'],          instruction: 'Forearms on floor, body straight. Squeeze core. Don\'t let hips sag.' },
+      { name: 'High Knees',          muscles: ['Cardio','Hip Flexors'],      instruction: 'Run in place, driving knees to chest height. Pump your arms.' },
+      { name: 'Lunges',              muscles: ['Quads','Glutes','Balance'],  instruction: 'Step forward, lower back knee toward floor. Alternate legs.' },
+      { name: 'Push-Up & Rotate',    muscles: ['Chest','Obliques','Core'],   instruction: 'Push-up, then rotate to side plank. Alternate sides each rep.' },
+      { name: 'Side Plank',          muscles: ['Obliques','Core','Shoulders'],instruction: 'Forearm on floor, hips up, body straight. Switch sides halfway.' },
     ]
   },
   core: {
     name: 'Core Crusher',
     exercises: [
-      { name: 'Plank',               icon: '🧘', instruction: 'Forearms on floor, hold body straight. Engage your entire core.' },
-      { name: 'Bicycle Crunches',    icon: '🚲', instruction: 'Opposite elbow to knee, alternating. Control the movement.' },
-      { name: 'Flutter Kicks',       icon: '🦶', instruction: 'Legs straight, small kicks up and down. Keep lower back pressed down.' },
-      { name: 'Mountain Climbers',   icon: '⛰️', instruction: 'Plank position, drive knees to chest alternating. Stay fast.' },
-      { name: 'Dead Bug',            icon: '🪲', instruction: 'On back, extend opposite arm and leg. Keep core braced.' },
-      { name: 'Russian Twists',      icon: '🌪️', instruction: 'Seated, lean back, rotate torso side to side. Feet off floor for extra challenge.' },
-      { name: 'Leg Raises',          icon: '🦵', instruction: 'Legs straight, raise to 90° and lower slowly. Control the descent.' },
-      { name: 'Side Plank Left',     icon: '📐', instruction: 'Left forearm down, hips up. Hold steady and breathe.' },
-      { name: 'Side Plank Right',    icon: '📐', instruction: 'Right forearm down, hips up. Hold steady and breathe.' },
-      { name: 'V-Ups',               icon: '✌️', instruction: 'Simultaneously lift legs and torso, reach for toes. Lower slowly.' },
-      { name: 'Bird Dogs',           icon: '🐕', instruction: 'Hands and knees, extend opposite arm and leg. Hold briefly.' },
-      { name: 'Superman Hold',       icon: '🦸', instruction: 'Face down, lift arms and legs off floor. Squeeze glutes and back.' },
+      { name: 'Plank',               muscles: ['Core','Shoulders'],          instruction: 'Forearms on floor, hold body straight. Engage your entire core.' },
+      { name: 'Bicycle Crunches',    muscles: ['Abs','Obliques'],            instruction: 'Opposite elbow to knee, alternating. Control the movement.' },
+      { name: 'Flutter Kicks',       muscles: ['Lower Abs','Hip Flexors'],   instruction: 'Legs straight, small kicks up and down. Keep lower back pressed down.' },
+      { name: 'Mountain Climbers',   muscles: ['Core','Cardio','Shoulders'], instruction: 'Plank position, drive knees to chest alternating. Stay fast.' },
+      { name: 'Dead Bug',            muscles: ['Core','Stability'],          instruction: 'On back, extend opposite arm and leg. Keep core braced.' },
+      { name: 'Russian Twists',      muscles: ['Obliques','Abs'],            instruction: 'Seated, lean back, rotate torso side to side. Feet off floor for extra challenge.' },
+      { name: 'Leg Raises',          muscles: ['Lower Abs','Hip Flexors'],   instruction: 'Legs straight, raise to 90° and lower slowly. Control the descent.' },
+      { name: 'Side Plank Left',     muscles: ['Obliques','Core'],           instruction: 'Left forearm down, hips up. Hold steady and breathe.' },
+      { name: 'Side Plank Right',    muscles: ['Obliques','Core'],           instruction: 'Right forearm down, hips up. Hold steady and breathe.' },
+      { name: 'V-Ups',               muscles: ['Abs','Hip Flexors'],         instruction: 'Simultaneously lift legs and torso, reach for toes. Lower slowly.' },
+      { name: 'Bird Dogs',           muscles: ['Core','Lower Back'],         instruction: 'Hands and knees, extend opposite arm and leg. Hold briefly.' },
+      { name: 'Superman Hold',       muscles: ['Lower Back','Glutes'],       instruction: 'Face down, lift arms and legs off floor. Squeeze glutes and back.' },
     ]
   },
   upper: {
     name: 'Upper Body Blast',
     exercises: [
-      { name: 'Push-Ups',            icon: '💪', instruction: 'Chest to floor, push back up. Keep core tight.' },
-      { name: 'Arm Circles',         icon: '⭕', instruction: 'Arms out, make small circles. Switch direction halfway.' },
-      { name: 'Diamond Push-Ups',    icon: '💎', instruction: 'Hands together under chest, lower and push up. Targets triceps.' },
-      { name: 'Shoulder Taps',       icon: '👋', instruction: 'Plank position, tap opposite shoulder. Minimize hip rotation.' },
-      { name: 'Tricep Dips',         icon: '💺', instruction: 'Hands on chair, lower body by bending elbows. Press back up.' },
-      { name: 'Wide Push-Ups',       icon: '🔷', instruction: 'Hands wider than shoulders. Lower chest, push up. Targets chest.' },
-      { name: 'Pike Push-Ups',       icon: '⛰️', instruction: 'Hips high, lower head toward floor. Targets shoulders.' },
-      { name: 'Plank Up-Downs',      icon: '🔄', instruction: 'From forearm plank, press up to hands one arm at a time. Alternate lead arm.' },
-      { name: 'Inchworms',           icon: '🐛', instruction: 'Bend forward, walk hands out to plank, walk back, stand up.' },
-      { name: 'Decline Push-Ups',    icon: '📈', instruction: 'Feet on chair, hands on floor. Push up. Targets upper chest.' },
-      { name: 'Plank Shoulder Taps', icon: '✋', instruction: 'High plank, tap shoulders alternating. Keep hips still.' },
-      { name: 'Superman Pulls',      icon: '🦸', instruction: 'Face down, pull elbows back like a row. Squeeze shoulder blades.' },
+      { name: 'Push-Ups',            muscles: ['Chest','Triceps','Core'],    instruction: 'Chest to floor, push back up. Keep core tight.' },
+      { name: 'Arm Circles',         muscles: ['Shoulders','Warm-Up'],       instruction: 'Arms out, make small circles. Switch direction halfway.' },
+      { name: 'Diamond Push-Ups',    muscles: ['Triceps','Chest'],           instruction: 'Hands together under chest, lower and push up. Targets triceps.' },
+      { name: 'Shoulder Taps',       muscles: ['Core','Shoulders'],          instruction: 'Plank position, tap opposite shoulder. Minimize hip rotation.' },
+      { name: 'Tricep Dips',         muscles: ['Triceps','Shoulders'],       instruction: 'Hands on chair, lower body by bending elbows. Press back up.' },
+      { name: 'Wide Push-Ups',       muscles: ['Chest','Shoulders'],         instruction: 'Hands wider than shoulders. Lower chest, push up. Targets chest.' },
+      { name: 'Pike Push-Ups',       muscles: ['Shoulders','Triceps'],       instruction: 'Hips high, lower head toward floor. Targets shoulders.' },
+      { name: 'Plank Up-Downs',      muscles: ['Triceps','Core','Shoulders'],instruction: 'From forearm plank, press up to hands one arm at a time. Alternate lead arm.' },
+      { name: 'Inchworms',           muscles: ['Full Body','Flexibility'],   instruction: 'Bend forward, walk hands out to plank, walk back, stand up.' },
+      { name: 'Decline Push-Ups',    muscles: ['Upper Chest','Shoulders'],   instruction: 'Feet on chair, hands on floor. Push up. Targets upper chest.' },
+      { name: 'Plank Shoulder Taps', muscles: ['Core','Shoulders'],          instruction: 'High plank, tap shoulders alternating. Keep hips still.' },
+      { name: 'Superman Pulls',      muscles: ['Upper Back','Rear Delts'],   instruction: 'Face down, pull elbows back like a row. Squeeze shoulder blades.' },
     ]
   },
   lower: {
     name: 'Legs & Glutes',
     exercises: [
-      { name: 'Squats',              icon: '🦵', instruction: 'Feet shoulder-width, sit back. Drive through heels.' },
-      { name: 'Alternating Lunges',  icon: '🦿', instruction: 'Step forward, lower back knee. Alternate legs each rep.' },
-      { name: 'Glute Bridges',       icon: '🌉', instruction: 'On back, feet flat, press hips up. Squeeze glutes at top.' },
-      { name: 'Jump Squats',         icon: '🚀', instruction: 'Squat down, explode up. Land softly. Repeat.' },
-      { name: 'Calf Raises',         icon: '🦶', instruction: 'Rise up on toes, hold briefly, lower slowly. Repeat.' },
-      { name: 'Wall Sit',            icon: '🧱', instruction: 'Back flat on wall, knees at 90°. Hold. Breathe.' },
-      { name: 'Sumo Squats',         icon: '🏋️', instruction: 'Wide stance, toes out. Squat deep, knees over toes.' },
-      { name: 'Single-Leg Deadlift', icon: '🧘', instruction: 'Balance on one leg, hinge forward. Switch sides halfway.' },
-      { name: 'Lateral Lunges',      icon: '↔️', instruction: 'Step wide to side, sit into hip. Push back. Alternate.' },
-      { name: 'Donkey Kicks',        icon: '🫏', instruction: 'Hands and knees, kick one heel to ceiling. Switch sides halfway.' },
-      { name: 'Curtsy Lunges',       icon: '🎭', instruction: 'Step back and across, lower knee. Alternate sides.' },
-      { name: 'Squat Hold',          icon: '⏸️', instruction: 'Squat to 90°, hold position. Fight through the burn.' },
+      { name: 'Squats',              muscles: ['Quads','Glutes','Hamstrings'],instruction: 'Feet shoulder-width, sit back. Drive through heels.' },
+      { name: 'Alternating Lunges',  muscles: ['Quads','Glutes','Balance'],  instruction: 'Step forward, lower back knee. Alternate legs each rep.' },
+      { name: 'Glute Bridges',       muscles: ['Glutes','Hamstrings'],       instruction: 'On back, feet flat, press hips up. Squeeze glutes at top.' },
+      { name: 'Jump Squats',         muscles: ['Quads','Glutes','Cardio'],   instruction: 'Squat down, explode up. Land softly. Repeat.' },
+      { name: 'Calf Raises',         muscles: ['Calves'],                    instruction: 'Rise up on toes, hold briefly, lower slowly. Repeat.' },
+      { name: 'Wall Sit',            muscles: ['Quads','Glutes'],            instruction: 'Back flat on wall, knees at 90°. Hold. Breathe.' },
+      { name: 'Sumo Squats',         muscles: ['Inner Thighs','Glutes'],     instruction: 'Wide stance, toes out. Squat deep, knees over toes.' },
+      { name: 'Single-Leg Deadlift', muscles: ['Hamstrings','Balance'],      instruction: 'Balance on one leg, hinge forward. Switch sides halfway.' },
+      { name: 'Lateral Lunges',      muscles: ['Inner Thighs','Glutes'],     instruction: 'Step wide to side, sit into hip. Push back. Alternate.' },
+      { name: 'Donkey Kicks',        muscles: ['Glutes'],                    instruction: 'Hands and knees, kick one heel to ceiling. Switch sides halfway.' },
+      { name: 'Curtsy Lunges',       muscles: ['Glutes','Quads'],            instruction: 'Step back and across, lower knee. Alternate sides.' },
+      { name: 'Squat Hold',          muscles: ['Quads','Glutes','Endurance'],instruction: 'Squat to 90°, hold position. Fight through the burn.' },
     ]
   }
 };
@@ -1027,6 +1194,47 @@ function startGetReady() {
   beep(880, 0.15);
 }
 
+function getSvg(name) {
+  return EXERCISE_SVG[name] || EXERCISE_SVG['Rest'] || '';
+}
+
+function updateProgressBar() {
+  const exercises = WORKOUTS[currentWorkoutId].exercises;
+  const total = exercises.length;
+  const pct = ((currentExerciseIndex + (isResting ? 0.5 : 0)) / total) * 100;
+  const fill = document.getElementById('workoutProgressFill');
+  fill.style.width = pct + '%';
+  fill.style.background = isResting ? 'var(--rest)' : 'var(--exercise)';
+}
+
+function renderMuscleTags(muscles, isRest) {
+  const container = document.getElementById('muscleTags');
+  if (isRest) {
+    container.innerHTML = '<span class="muscle-tag rest-tag">Recovery</span>';
+    return;
+  }
+  container.innerHTML = (muscles || []).map(m =>
+    `<span class="muscle-tag">${m}</span>`
+  ).join('');
+}
+
+function updateNextPreview(exercises) {
+  const card = document.getElementById('nextPreviewCard');
+  const figEl = document.getElementById('nextPreviewFig');
+  const nameEl = document.getElementById('nextPreviewName');
+
+  if (currentExerciseIndex < exercises.length - 1) {
+    const next = exercises[currentExerciseIndex + 1];
+    card.style.display = 'flex';
+    figEl.innerHTML = getSvg(next.name);
+    nameEl.textContent = next.name;
+  } else {
+    card.style.display = 'flex';
+    figEl.innerHTML = '🏁';
+    nameEl.textContent = 'Last one — finish strong!';
+  }
+}
+
 function startExercisePhase() {
   const exercises = WORKOUTS[currentWorkoutId].exercises;
   const ex = exercises[currentExerciseIndex];
@@ -1037,23 +1245,25 @@ function startExercisePhase() {
   // Update UI
   document.getElementById('exCounter').textContent =
     `${currentExerciseIndex + 1} of ${exercises.length}`;
-  document.getElementById('exFigure').textContent = ex.icon;
+
+  // SVG figure
+  const figEl = document.getElementById('exFigure');
+  figEl.innerHTML = getSvg(ex.name);
+  figEl.classList.remove('rest-fig');
+  figEl.classList.add('pulse-anim');
+
   document.getElementById('exTitle').textContent = ex.name;
+  renderMuscleTags(ex.muscles, false);
   document.getElementById('exInstruction').textContent = ex.instruction;
   document.getElementById('timerPhase').textContent = 'EXERCISE';
   document.getElementById('timerPhase').style.color = 'var(--exercise)';
   document.getElementById('timerSeconds').textContent = timeRemaining;
   document.getElementById('timerExName').textContent = '';
 
-  // Next up
-  if (currentExerciseIndex < exercises.length - 1) {
-    document.getElementById('nextUpLabel').textContent = 'NEXT UP';
-    document.getElementById('nextUpName').textContent =
-      exercises[currentExerciseIndex + 1].icon + ' ' + exercises[currentExerciseIndex + 1].name;
-  } else {
-    document.getElementById('nextUpLabel').textContent = '';
-    document.getElementById('nextUpName').textContent = 'Last one! 💪';
-  }
+  // Next preview card
+  updateNextPreview(exercises);
+  // Progress bar
+  updateProgressBar();
 
   // Timer ring
   const progress = document.getElementById('timerProgress');
@@ -1077,13 +1287,25 @@ function startRestPhase() {
   document.getElementById('timerPhase').style.color = 'var(--rest)';
   document.getElementById('timerSeconds').textContent = timeRemaining;
 
+  // Show next exercise SVG during rest
   if (currentExerciseIndex + 1 < exercises.length) {
     const next = exercises[currentExerciseIndex + 1];
     document.getElementById('timerExName').textContent = 'Next: ' + next.name;
-    document.getElementById('exFigure').textContent = '😮‍💨';
+
+    const figEl = document.getElementById('exFigure');
+    figEl.innerHTML = getSvg(next.name);
+    figEl.classList.add('rest-fig');
+    figEl.classList.remove('pulse-anim');
+
     document.getElementById('exTitle').textContent = 'Rest';
-    document.getElementById('exInstruction').textContent = 'Breathe. Shake it out. Next up: ' + next.name;
+    renderMuscleTags(null, true);
+    document.getElementById('exInstruction').textContent = 'Breathe. Shake it out.';
+
+    updateNextPreview(exercises);
   }
+
+  // Progress bar
+  updateProgressBar();
 
   // Timer ring
   const progress = document.getElementById('timerProgress');
@@ -1219,14 +1441,23 @@ function finishWorkout() {
 // ==================== INIT ====================
 loadSettings();
 
-// Populate classic workout pills
+// Populate classic workout preview with SVG figures
 const classicPills = document.getElementById('classicPills');
-WORKOUTS.classic.exercises.forEach(ex => {
-  const pill = document.createElement('span');
-  pill.className = 'pill';
-  pill.textContent = ex.icon + ' ' + ex.name;
-  classicPills.appendChild(pill);
+WORKOUTS.classic.exercises.forEach((ex, i) => {
+  const item = document.createElement('div');
+  item.style.cssText = 'display:flex;align-items:center;gap:8px;width:48%;margin-bottom:2px;';
+  const figDiv = document.createElement('div');
+  figDiv.style.cssText = 'width:28px;height:28px;color:var(--text);opacity:0.6;flex-shrink:0;';
+  figDiv.innerHTML = getSvg(ex.name);
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'pill';
+  nameSpan.textContent = ex.name;
+  nameSpan.style.cssText = 'padding:2px 0;background:none;color:var(--text-dim);font-size:11px;';
+  item.appendChild(figDiv);
+  item.appendChild(nameSpan);
+  classicPills.appendChild(item);
 });
+classicPills.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:14px;';
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
