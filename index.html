@@ -985,6 +985,8 @@
 <script src="exercise-images.js"></script>
 <script>
 // ==================== EXERCISE DATA ====================
+<<scriptscript src="exercise-figures.js"></script>
+<<scriptscript>
 const WORKOUTS = {
   classic: {
     name: 'The Original 7-Minute',
@@ -1225,34 +1227,24 @@ function getSvg(name) {
   return EXERCISE_SVG[name] || EXERCISE_SVG['Rest'] || '';
 }
 
-function renderFigure(elId, exerciseName, animate) {
+function renderFigure(elId, exerciseName, phase) {
   const el = document.getElementById(elId);
-  const images = (typeof EXERCISE_IMAGES !== 'undefined') ? EXERCISE_IMAGES[exerciseName] : null;
-  
-  if (images && images.length >= 2) {
-    el.innerHTML = '<img class="fig-pos-0" src="' + images[0] + '" alt="' + exerciseName + ' position 1">' +
-                   '<img class="fig-pos-1" src="' + images[1] + '" alt="' + exerciseName + ' position 2">';
-    if (animate) {
-      el.classList.add('animating');
-    } else {
-      el.classList.remove('animating');
-    }
-  } else if (images && images.length === 1) {
-    el.innerHTML = '<img class="fig-pos-0" src="' + images[0] + '" alt="' + exerciseName + '">';
+  const figures = EXERCISE_FIGURES[exerciseName];
+  if (!figures) {
+    el.innerHTML = '<<divdiv class="fig-fallback" style="font-size: 48px; text-align: center; padding-top: 60px;">❓</div>';
     el.classList.remove('animating');
-  } else {
-    // SVG fallback
-    el.innerHTML = '<div class="fig-fallback">' + getSvg(exerciseName) + '</div>';
-    el.classList.remove('animating');
+    return;
   }
+  const svgMarkup = (phase === 'active') ? figures.b : figures.a;
+  el.innerHTML = svgMarkup;
+  if (phase === 'active') { el.classList.add('animating'); } 
+  else { el.classList.remove('animating'); }
 }
 
 function renderSmallFigure(exerciseName) {
-  const images = (typeof EXERCISE_IMAGES !== 'undefined') ? EXERCISE_IMAGES[exerciseName] : null;
-  if (images && images.length > 0) {
-    return '<img src="' + images[0] + '" alt="' + exerciseName + '" style="width:100%;height:100%;object-fit:contain;border-radius:6px;background:var(--surface);">';
-  }
-  return getSvg(exerciseName);
+  const figures = EXERCISE_FIGURES[exerciseName];
+  if (figures && figures.a) { return figures.a; }
+  return '<<divdiv style="font-size: 32px; text-align: center; line-height: 1;">🏃</div>';
 }
 
 function updateProgressBar() {
@@ -1279,8 +1271,7 @@ function updateNextPreview(exercises) {
   const card = document.getElementById('nextPreviewCard');
   const figEl = document.getElementById('nextPreviewFig');
   const nameEl = document.getElementById('nextPreviewName');
-
-  if (currentExerciseIndex < exercises.length - 1) {
+  if (currentExerciseIndex << exercises exercises.length - 1) {
     const next = exercises[currentExerciseIndex + 1];
     card.style.display = 'flex';
     figEl.innerHTML = renderSmallFigure(next.name);
@@ -1295,19 +1286,12 @@ function updateNextPreview(exercises) {
 function startExercisePhase() {
   const exercises = WORKOUTS[currentWorkoutId].exercises;
   const ex = exercises[currentExerciseIndex];
-
   isResting = false;
   timeRemaining = settings.exerciseDur;
-
-  // Update UI
-  document.getElementById('exCounter').textContent =
-    `${currentExerciseIndex + 1} of ${exercises.length}`;
-
-  // Exercise figure (photo with crossfade animation)
+  document.getElementById('exCounter').textContent = `${currentExerciseIndex + 1} of ${exercises.length}`;
   const figEl = document.getElementById('exFigure');
   figEl.classList.remove('rest-fig');
-  renderFigure('exFigure', ex.name, true);
-
+  renderFigure('exFigure', ex.name, 'active');
   document.getElementById('exTitle').textContent = ex.name;
   renderMuscleTags(ex.muscles, false);
   document.getElementById('exInstruction').textContent = ex.instruction;
@@ -1315,60 +1299,39 @@ function startExercisePhase() {
   document.getElementById('timerPhase').style.color = 'var(--exercise)';
   document.getElementById('timerSeconds').textContent = timeRemaining;
   document.getElementById('timerExName').textContent = '';
-
-  // Next preview card
   updateNextPreview(exercises);
-  // Progress bar
   updateProgressBar();
-
-  // Timer ring
   const progress = document.getElementById('timerProgress');
   progress.style.stroke = 'var(--exercise)';
   progress.style.filter = 'drop-shadow(0 0 8px var(--exercise-glow))';
-
-  // Voice
   speak(ex.name);
   beep(1000, 0.2);
-
   startTimer(settings.exerciseDur);
 }
 
 function startRestPhase() {
   const exercises = WORKOUTS[currentWorkoutId].exercises;
-
   isResting = true;
   timeRemaining = settings.restDur;
-
   document.getElementById('timerPhase').textContent = 'REST';
   document.getElementById('timerPhase').style.color = 'var(--rest)';
   document.getElementById('timerSeconds').textContent = timeRemaining;
-
-  // Show next exercise figure during rest (static, dimmed)
-  if (currentExerciseIndex + 1 < exercises.length) {
+  if (currentExerciseIndex + 1 << exercises exercises.length) {
     const next = exercises[currentExerciseIndex + 1];
     document.getElementById('timerExName').textContent = 'Next: ' + next.name;
-
     const figEl = document.getElementById('exFigure');
     figEl.classList.add('rest-fig');
-    renderFigure('exFigure', next.name, false);
-
+    renderFigure('exFigure', next.name, 'rest');
     document.getElementById('exTitle').textContent = 'Rest';
     renderMuscleTags(null, true);
     document.getElementById('exInstruction').textContent = 'Breathe. Shake it out.';
-
     updateNextPreview(exercises);
   }
-
-  // Progress bar
   updateProgressBar();
-
-  // Timer ring
   const progress = document.getElementById('timerProgress');
   progress.style.stroke = 'var(--rest)';
   progress.style.filter = 'drop-shadow(0 0 8px var(--rest-glow))';
-
   beep(600, 0.3);
-
   startTimer(settings.restDur);
 }
 
@@ -1532,6 +1495,7 @@ async function requestWakeLock() {
     }
   } catch(e) {}
 }
+</script>
 </script>
 
 </body>
