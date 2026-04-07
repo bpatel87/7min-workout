@@ -559,28 +559,54 @@
     color: var(--text-dim);
   }
 
-  /* ========== EXERCISE FIGURE SVG ========== */
+  /* ========== EXERCISE FIGURE (Photo) ========== */
   .exercise-figure {
-    width: 180px;
-    height: 180px;
+    width: 200px;
+    height: 200px;
     margin: 0 auto 16px;
-    color: var(--text);
-    opacity: 0.9;
-    transition: opacity 0.3s, transform 0.3s;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--surface);
   }
-  .exercise-figure svg {
+  .exercise-figure img {
+    position: absolute;
+    top: 0; left: 0;
     width: 100%;
     height: 100%;
+    object-fit: contain;
+    background: var(--surface);
+    transition: opacity 0.6s ease-in-out;
   }
-  .exercise-figure.rest-fig {
-    opacity: 0.4;
+  .exercise-figure img.fig-pos-0 { opacity: 1; }
+  .exercise-figure img.fig-pos-1 { opacity: 0; }
+  .exercise-figure.animating img.fig-pos-0 {
+    animation: figCrossfade 2s ease-in-out infinite;
   }
-  .exercise-figure.pulse-anim {
-    animation: figPulse 1s ease-in-out infinite alternate;
+  .exercise-figure.animating img.fig-pos-1 {
+    animation: figCrossfade 2s ease-in-out infinite reverse;
   }
-  @keyframes figPulse {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.03); }
+  @keyframes figCrossfade {
+    0%, 40% { opacity: 1; }
+    50%, 90% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  .exercise-figure.rest-fig { opacity: 0.5; }
+  .exercise-figure.rest-fig img { animation: none !important; }
+  .exercise-figure .fig-fallback {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    opacity: 0.7;
+  }
+  .exercise-figure .fig-fallback svg {
+    width: 80%;
+    height: 80%;
   }
 
   /* ========== EXERCISE PREVIEW LIST ========== */
@@ -956,6 +982,7 @@
 </div>
 
 <script src="exercises.js"></script>
+<script src="exercise-images.js"></script>
 <script>
 // ==================== EXERCISE DATA ====================
 const WORKOUTS = {
@@ -1198,6 +1225,36 @@ function getSvg(name) {
   return EXERCISE_SVG[name] || EXERCISE_SVG['Rest'] || '';
 }
 
+function renderFigure(elId, exerciseName, animate) {
+  const el = document.getElementById(elId);
+  const images = (typeof EXERCISE_IMAGES !== 'undefined') ? EXERCISE_IMAGES[exerciseName] : null;
+  
+  if (images && images.length >= 2) {
+    el.innerHTML = '<img class="fig-pos-0" src="' + images[0] + '" alt="' + exerciseName + ' position 1">' +
+                   '<img class="fig-pos-1" src="' + images[1] + '" alt="' + exerciseName + ' position 2">';
+    if (animate) {
+      el.classList.add('animating');
+    } else {
+      el.classList.remove('animating');
+    }
+  } else if (images && images.length === 1) {
+    el.innerHTML = '<img class="fig-pos-0" src="' + images[0] + '" alt="' + exerciseName + '">';
+    el.classList.remove('animating');
+  } else {
+    // SVG fallback
+    el.innerHTML = '<div class="fig-fallback">' + getSvg(exerciseName) + '</div>';
+    el.classList.remove('animating');
+  }
+}
+
+function renderSmallFigure(exerciseName) {
+  const images = (typeof EXERCISE_IMAGES !== 'undefined') ? EXERCISE_IMAGES[exerciseName] : null;
+  if (images && images.length > 0) {
+    return '<img src="' + images[0] + '" alt="' + exerciseName + '" style="width:100%;height:100%;object-fit:contain;border-radius:6px;background:var(--surface);">';
+  }
+  return getSvg(exerciseName);
+}
+
 function updateProgressBar() {
   const exercises = WORKOUTS[currentWorkoutId].exercises;
   const total = exercises.length;
@@ -1226,7 +1283,7 @@ function updateNextPreview(exercises) {
   if (currentExerciseIndex < exercises.length - 1) {
     const next = exercises[currentExerciseIndex + 1];
     card.style.display = 'flex';
-    figEl.innerHTML = getSvg(next.name);
+    figEl.innerHTML = renderSmallFigure(next.name);
     nameEl.textContent = next.name;
   } else {
     card.style.display = 'flex';
@@ -1246,11 +1303,10 @@ function startExercisePhase() {
   document.getElementById('exCounter').textContent =
     `${currentExerciseIndex + 1} of ${exercises.length}`;
 
-  // SVG figure
+  // Exercise figure (photo with crossfade animation)
   const figEl = document.getElementById('exFigure');
-  figEl.innerHTML = getSvg(ex.name);
   figEl.classList.remove('rest-fig');
-  figEl.classList.add('pulse-anim');
+  renderFigure('exFigure', ex.name, true);
 
   document.getElementById('exTitle').textContent = ex.name;
   renderMuscleTags(ex.muscles, false);
@@ -1287,15 +1343,14 @@ function startRestPhase() {
   document.getElementById('timerPhase').style.color = 'var(--rest)';
   document.getElementById('timerSeconds').textContent = timeRemaining;
 
-  // Show next exercise SVG during rest
+  // Show next exercise figure during rest (static, dimmed)
   if (currentExerciseIndex + 1 < exercises.length) {
     const next = exercises[currentExerciseIndex + 1];
     document.getElementById('timerExName').textContent = 'Next: ' + next.name;
 
     const figEl = document.getElementById('exFigure');
-    figEl.innerHTML = getSvg(next.name);
     figEl.classList.add('rest-fig');
-    figEl.classList.remove('pulse-anim');
+    renderFigure('exFigure', next.name, false);
 
     document.getElementById('exTitle').textContent = 'Rest';
     renderMuscleTags(null, true);
@@ -1441,18 +1496,17 @@ function finishWorkout() {
 // ==================== INIT ====================
 loadSettings();
 
-// Populate classic workout preview with SVG figures
+// Populate classic workout preview with photo thumbnails
 const classicPills = document.getElementById('classicPills');
 WORKOUTS.classic.exercises.forEach((ex, i) => {
   const item = document.createElement('div');
-  item.style.cssText = 'display:flex;align-items:center;gap:8px;width:48%;margin-bottom:2px;';
+  item.style.cssText = 'display:flex;align-items:center;gap:8px;width:48%;margin-bottom:4px;';
   const figDiv = document.createElement('div');
-  figDiv.style.cssText = 'width:28px;height:28px;color:var(--text);opacity:0.6;flex-shrink:0;';
-  figDiv.innerHTML = getSvg(ex.name);
+  figDiv.style.cssText = 'width:36px;height:36px;flex-shrink:0;border-radius:8px;overflow:hidden;background:var(--surface2);';
+  figDiv.innerHTML = renderSmallFigure(ex.name);
   const nameSpan = document.createElement('span');
-  nameSpan.className = 'pill';
   nameSpan.textContent = ex.name;
-  nameSpan.style.cssText = 'padding:2px 0;background:none;color:var(--text-dim);font-size:11px;';
+  nameSpan.style.cssText = 'color:var(--text-dim);font-size:12px;font-weight:500;';
   item.appendChild(figDiv);
   item.appendChild(nameSpan);
   classicPills.appendChild(item);
