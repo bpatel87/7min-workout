@@ -773,6 +773,9 @@
   /* Hide scrollbar but allow scroll */
   ::-webkit-scrollbar { width: 0; }
 </style>
+  
+  
+  <<scriptscript src="exercise-figures.js"></script>
 </head>
 <body>
 
@@ -985,7 +988,7 @@
 <script src="exercise-images.js"></script>
 <script>
 // ==================== EXERCISE DATA ====================
-<<scriptscript src="exercise-figures.js"></script>
+
 <<scriptscript>
 const WORKOUTS = {
   classic: {
@@ -1197,7 +1200,7 @@ function startGetReady() {
   const exercises = WORKOUTS[currentWorkoutId].exercises;
 
   overlay.classList.add('active');
-  exEl.textContent = exercises[0].icon + ' ' + exercises[0].name;
+  exEl.textContent = exercises[0].name;
 
   let count = settings.countdown;
   countEl.textContent = count;
@@ -1229,7 +1232,7 @@ function getSvg(name) {
 
 function renderFigure(elId, exerciseName, phase) {
   const el = document.getElementById(elId);
-  const figures = EXERCISE_FIGURES[exerciseName];
+const figures = EXERCISE_SVG[exerciseName];
   if (!figures) {
     el.innerHTML = '<<divdiv class="fig-fallback" style="font-size: 48px; text-align: center; padding-top: 60px;">❓</div>';
     el.classList.remove('animating');
@@ -1242,7 +1245,7 @@ function renderFigure(elId, exerciseName, phase) {
 }
 
 function renderSmallFigure(exerciseName) {
-  const figures = EXERCISE_FIGURES[exerciseName];
+const figures = EXERCISE_SVG[exerciseName];
   if (figures && figures.a) { return figures.a; }
   return '<<divdiv style="font-size: 32px; text-align: center; line-height: 1;">🏃</div>';
 }
