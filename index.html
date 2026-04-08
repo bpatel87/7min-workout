@@ -775,7 +775,84 @@
 </style>
   
   
-  <<scriptscript src="exercise-figures.js"></script>
+  <<scriptscript src="exercise-figures.js">
+// ==================== ROBUST INIT ENGINE ====================
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 7-Minute Workout App Initializing...");
+    
+    try {
+        // 1. Attach Workout Card Listeners
+        document.querySelectorAll('[data-workout-id]').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const id = card.getAttribute('data-workout-id');
+                console.log(`🎯 Workout selected: ${id}`);
+                selectWorkout(id);
+            });
+        });
+
+        // 2. Attach Settings Listeners
+        document.querySelectorAll('[data-action="settings"]').forEach(el => {
+            el.addEventListener('click', () => {
+                console.log("⚙️ Opening Settings");
+                openSettings();
+            });
+        });
+
+        document.querySelectorAll('[data-action="close-settings"]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                console.log("⚙️ Closing Settings");
+                closeSettings(e);
+            });
+        });
+
+        // 3. Attach Control Button Listeners
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            console.log("⏸ Toggle Pause");
+            togglePause();
+        });
+
+        document.querySelector('[data-action="skip"]').addEventListener('click', () => {
+            console.log("⏭ Skip Exercise");
+            skipExercise();
+        });
+
+        document.querySelector('[data-action="exit"]').addEventListener('click', () => {
+            console.log("🏠 Exit Workout");
+            exitWorkout();
+        });
+
+        document.querySelector('[data-action="home"]').addEventListener('click', () => {
+            console.log("🏠 Go Home");
+            goHome();
+        });
+
+        // 4. Attach Setting Adjustments
+        document.querySelectorAll('[data-adjust]').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-adjust');
+                const delta = parseInt(el.getAttribute('data-delta'));
+                console.log(`🛠 Adjusting ${key} by ${delta}`);
+                adjustSetting(key, delta);
+            });
+        });
+
+        document.querySelectorAll('[data-toggle]').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-toggle');
+                console.log(` toggling ${key}`);
+                toggleSetting(key);
+            });
+        });
+
+        console.log("✅ Initialization complete. App is ready!");
+
+    } catch (err) {
+        console.error("❌ FATAL INITIALIZATION ERROR:", err);
+        alert("The app failed to start. Please check the browser console for details.");
+    }
+});
+
+</script>
 </head>
 <body>
 
@@ -786,7 +863,7 @@
   <p class="hero-sub">Science-based HIIT. No equipment. No excuses.</p>
 
   <!-- Classic Workout Card -->
-  <div class="workout-card" onclick="selectWorkout('classic')">
+  <div class="workout-card" data-workout-id="classic">
     <div class="card-badge badge-classic">Classic</div>
     <div class="card-title">The Original 7-Minute</div>
     <div class="card-meta">
@@ -795,13 +872,13 @@
       <span>💪 Full Body</span>
     </div>
     <div class="card-exercises" id="classicPills"></div>
-    <button class="start-btn btn-orange" onclick="event.stopPropagation(); selectWorkout('classic')">
+    <button class="start-btn btn-orange" data-workout-id="classic">
       ▶ Start Workout
     </button>
   </div>
 
   <!-- Core Workout Card -->
-  <div class="workout-card" onclick="selectWorkout('core')">
+  <div class="workout-card" data-workout-id="core">
     <div class="card-badge badge-core">Core</div>
     <div class="card-title">Core Crusher</div>
     <div class="card-meta">
@@ -809,13 +886,13 @@
       <span>🔥 12 exercises</span>
       <span>🎯 Abs & Back</span>
     </div>
-    <button class="start-btn btn-orange" onclick="event.stopPropagation(); selectWorkout('core')">
+    <button class="start-btn btn-orange" data-workout-id="core">
       ▶ Start Workout
     </button>
   </div>
 
   <!-- Upper Body Card -->
-  <div class="workout-card" onclick="selectWorkout('upper')">
+  <div class="workout-card" data-workout-id="upper">
     <div class="card-badge badge-upper">Upper Body</div>
     <div class="card-title">Upper Body Blast</div>
     <div class="card-meta">
@@ -823,13 +900,13 @@
       <span>🔥 12 exercises</span>
       <span>💪 Arms & Chest</span>
     </div>
-    <button class="start-btn btn-orange" onclick="event.stopPropagation(); selectWorkout('upper')">
+    <button class="start-btn btn-orange" data-workout-id="upper">
       ▶ Start Workout
     </button>
   </div>
 
   <!-- Lower Body Card -->
-  <div class="workout-card" onclick="selectWorkout('lower')">
+  <div class="workout-card" data-workout-id="lower">
     <div class="card-badge badge-lower">Lower Body</div>
     <div class="card-title">Legs & Glutes</div>
     <div class="card-meta">
@@ -837,13 +914,13 @@
       <span>🔥 12 exercises</span>
       <span>🦵 Lower Body</span>
     </div>
-    <button class="start-btn btn-orange" onclick="event.stopPropagation(); selectWorkout('lower')">
+    <button class="start-btn btn-orange" data-workout-id="lower">
       ▶ Start Workout
     </button>
   </div>
 
   <!-- Settings -->
-  <div class="workout-card" onclick="openSettings()" style="text-align:center; padding: 20px;">
+  <div class="workout-card" data-action="settings" style="text-align:center; padding: 20px;">
     <div style="font-size: 15px; font-weight: 700; color: var(--text-dim);">⚙️ Settings</div>
   </div>
 </div>
@@ -852,7 +929,7 @@
 <div id="workout">
   <div class="workout-progress"><div class="workout-progress-fill" id="workoutProgressFill" style="width:0%"></div></div>
   <div class="workout-header">
-    <button class="back-btn" onclick="exitWorkout()">✕</button>
+    <button class="back-btn" data-action="exit">✕</button>
     <div class="exercise-counter" id="exCounter">1 of 12</div>
   </div>
 
@@ -885,8 +962,8 @@
 
   <div class="controls">
     <button class="ctrl-btn" onclick="prevExercise()" title="Previous">⏮</button>
-    <button class="ctrl-btn ctrl-pause" id="pauseBtn" onclick="togglePause()">⏸</button>
-    <button class="ctrl-btn" onclick="skipExercise()" title="Skip">⏭</button>
+    <button class="ctrl-btn ctrl-pause" id="pauseBtn" data-action="pause">⏸</button>
+    <button class="ctrl-btn" data-action="skip" title="Skip">⏭</button>
   </div>
 </div>
 
@@ -913,7 +990,7 @@
 
   <div class="complete-actions">
     <button class="start-btn btn-orange" onclick="selectWorkout(currentWorkoutId)">🔄 Do It Again</button>
-    <button class="start-btn" style="background:var(--surface); color:var(--text);" onclick="goHome()">🏠 Back Home</button>
+    <button class="start-btn" style="background:var(--surface); color:var(--text);" data-action="home">🏠 Back Home</button>
   </div>
 </div>
 
@@ -925,7 +1002,7 @@
 </div>
 
 <!-- ==================== SETTINGS MODAL ==================== -->
-<div class="modal-overlay" id="settingsModal" onclick="closeSettings(event)">
+<div class="modal-overlay" id="settingsModal" data-action="close-settings">
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-title">Settings</div>
@@ -936,9 +1013,9 @@
         <div class="setting-desc">Seconds per exercise</div>
       </div>
       <div class="setting-control">
-        <button class="adj-btn" onclick="adjustSetting('exerciseDur', -5)">−</button>
+        <button class="adj-btn" data-adjust="exerciseDur" data-delta="-5">−</button>
         <div class="setting-value" id="valExerciseDur">30</div>
-        <button class="adj-btn" onclick="adjustSetting('exerciseDur', 5)">+</button>
+        <button class="adj-btn" data-adjust="exerciseDur" data-delta="5">+</button>
       </div>
     </div>
 
@@ -948,9 +1025,9 @@
         <div class="setting-desc">Seconds between exercises</div>
       </div>
       <div class="setting-control">
-        <button class="adj-btn" onclick="adjustSetting('restDur', -5)">−</button>
+        <button class="adj-btn" data-adjust="restDur" data-delta="-5">−</button>
         <div class="setting-value" id="valRestDur">10</div>
-        <button class="adj-btn" onclick="adjustSetting('restDur', 5)">+</button>
+        <button class="adj-btn" data-adjust="restDur" data-delta="5">+</button>
       </div>
     </div>
 
@@ -959,7 +1036,7 @@
         <div class="setting-label">Voice Coach</div>
         <div class="setting-desc">Announce exercises</div>
       </div>
-      <div class="toggle on" id="toggleVoice" onclick="toggleSetting('voice')"></div>
+      <div class="toggle on" id="toggleVoice" data-toggle="voice"></div>
     </div>
 
     <div class="setting-row">
@@ -967,7 +1044,7 @@
         <div class="setting-label">Sound Effects</div>
         <div class="setting-desc">Beeps and transitions</div>
       </div>
-      <div class="toggle on" id="toggleSound" onclick="toggleSetting('sound')"></div>
+      <div class="toggle on" id="toggleSound" data-toggle="sound"></div>
     </div>
 
     <div class="setting-row" style="border: none;">
@@ -976,16 +1053,170 @@
         <div class="setting-desc">Get Ready countdown seconds</div>
       </div>
       <div class="setting-control">
-        <button class="adj-btn" onclick="adjustSetting('countdown', -1)">−</button>
+        <button class="adj-btn" data-adjust="countdown" data-delta="-1">−</button>
         <div class="setting-value" id="valCountdown">3</div>
-        <button class="adj-btn" onclick="adjustSetting('countdown', 1)">+</button>
+        <button class="adj-btn" data-adjust="countdown" data-delta="1">+</button>
       </div>
     </div>
   </div>
 </div>
 
-<script src="exercises.js"></script>
-<script src="exercise-images.js"></script>
+<script src="exercises.js">
+// ==================== ROBUST INIT ENGINE ====================
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 7-Minute Workout App Initializing...");
+    
+    try {
+        // 1. Attach Workout Card Listeners
+        document.querySelectorAll('[data-workout-id]').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const id = card.getAttribute('data-workout-id');
+                console.log(`🎯 Workout selected: ${id}`);
+                selectWorkout(id);
+            });
+        });
+
+        // 2. Attach Settings Listeners
+        document.querySelectorAll('[data-action="settings"]').forEach(el => {
+            el.addEventListener('click', () => {
+                console.log("⚙️ Opening Settings");
+                openSettings();
+            });
+        });
+
+        document.querySelectorAll('[data-action="close-settings"]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                console.log("⚙️ Closing Settings");
+                closeSettings(e);
+            });
+        });
+
+        // 3. Attach Control Button Listeners
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            console.log("⏸ Toggle Pause");
+            togglePause();
+        });
+
+        document.querySelector('[data-action="skip"]').addEventListener('click', () => {
+            console.log("⏭ Skip Exercise");
+            skipExercise();
+        });
+
+        document.querySelector('[data-action="exit"]').addEventListener('click', () => {
+            console.log("🏠 Exit Workout");
+            exitWorkout();
+        });
+
+        document.querySelector('[data-action="home"]').addEventListener('click', () => {
+            console.log("🏠 Go Home");
+            goHome();
+        });
+
+        // 4. Attach Setting Adjustments
+        document.querySelectorAll('[data-adjust]').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-adjust');
+                const delta = parseInt(el.getAttribute('data-delta'));
+                console.log(`🛠 Adjusting ${key} by ${delta}`);
+                adjustSetting(key, delta);
+            });
+        });
+
+        document.querySelectorAll('[data-toggle]').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-toggle');
+                console.log(` toggling ${key}`);
+                toggleSetting(key);
+            });
+        });
+
+        console.log("✅ Initialization complete. App is ready!");
+
+    } catch (err) {
+        console.error("❌ FATAL INITIALIZATION ERROR:", err);
+        alert("The app failed to start. Please check the browser console for details.");
+    }
+});
+
+</script>
+<script src="exercise-images.js">
+// ==================== ROBUST INIT ENGINE ====================
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 7-Minute Workout App Initializing...");
+    
+    try {
+        // 1. Attach Workout Card Listeners
+        document.querySelectorAll('[data-workout-id]').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const id = card.getAttribute('data-workout-id');
+                console.log(`🎯 Workout selected: ${id}`);
+                selectWorkout(id);
+            });
+        });
+
+        // 2. Attach Settings Listeners
+        document.querySelectorAll('[data-action="settings"]').forEach(el => {
+            el.addEventListener('click', () => {
+                console.log("⚙️ Opening Settings");
+                openSettings();
+            });
+        });
+
+        document.querySelectorAll('[data-action="close-settings"]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                console.log("⚙️ Closing Settings");
+                closeSettings(e);
+            });
+        });
+
+        // 3. Attach Control Button Listeners
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            console.log("⏸ Toggle Pause");
+            togglePause();
+        });
+
+        document.querySelector('[data-action="skip"]').addEventListener('click', () => {
+            console.log("⏭ Skip Exercise");
+            skipExercise();
+        });
+
+        document.querySelector('[data-action="exit"]').addEventListener('click', () => {
+            console.log("🏠 Exit Workout");
+            exitWorkout();
+        });
+
+        document.querySelector('[data-action="home"]').addEventListener('click', () => {
+            console.log("🏠 Go Home");
+            goHome();
+        });
+
+        // 4. Attach Setting Adjustments
+        document.querySelectorAll('[data-adjust]').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-adjust');
+                const delta = parseInt(el.getAttribute('data-delta'));
+                console.log(`🛠 Adjusting ${key} by ${delta}`);
+                adjustSetting(key, delta);
+            });
+        });
+
+        document.querySelectorAll('[data-toggle]').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-toggle');
+                console.log(` toggling ${key}`);
+                toggleSetting(key);
+            });
+        });
+
+        console.log("✅ Initialization complete. App is ready!");
+
+    } catch (err) {
+        console.error("❌ FATAL INITIALIZATION ERROR:", err);
+        alert("The app failed to start. Please check the browser console for details.");
+    }
+});
+
+</script>
 <script>
 // ==================== EXERCISE DATA ====================
 
@@ -1498,7 +1729,161 @@ async function requestWakeLock() {
     }
   } catch(e) {}
 }
+
+// ==================== ROBUST INIT ENGINE ====================
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 7-Minute Workout App Initializing...");
+    
+    try {
+        // 1. Attach Workout Card Listeners
+        document.querySelectorAll('[data-workout-id]').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const id = card.getAttribute('data-workout-id');
+                console.log(`🎯 Workout selected: ${id}`);
+                selectWorkout(id);
+            });
+        });
+
+        // 2. Attach Settings Listeners
+        document.querySelectorAll('[data-action="settings"]').forEach(el => {
+            el.addEventListener('click', () => {
+                console.log("⚙️ Opening Settings");
+                openSettings();
+            });
+        });
+
+        document.querySelectorAll('[data-action="close-settings"]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                console.log("⚙️ Closing Settings");
+                closeSettings(e);
+            });
+        });
+
+        // 3. Attach Control Button Listeners
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            console.log("⏸ Toggle Pause");
+            togglePause();
+        });
+
+        document.querySelector('[data-action="skip"]').addEventListener('click', () => {
+            console.log("⏭ Skip Exercise");
+            skipExercise();
+        });
+
+        document.querySelector('[data-action="exit"]').addEventListener('click', () => {
+            console.log("🏠 Exit Workout");
+            exitWorkout();
+        });
+
+        document.querySelector('[data-action="home"]').addEventListener('click', () => {
+            console.log("🏠 Go Home");
+            goHome();
+        });
+
+        // 4. Attach Setting Adjustments
+        document.querySelectorAll('[data-adjust]').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-adjust');
+                const delta = parseInt(el.getAttribute('data-delta'));
+                console.log(`🛠 Adjusting ${key} by ${delta}`);
+                adjustSetting(key, delta);
+            });
+        });
+
+        document.querySelectorAll('[data-toggle]').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-toggle');
+                console.log(` toggling ${key}`);
+                toggleSetting(key);
+            });
+        });
+
+        console.log("✅ Initialization complete. App is ready!");
+
+    } catch (err) {
+        console.error("❌ FATAL INITIALIZATION ERROR:", err);
+        alert("The app failed to start. Please check the browser console for details.");
+    }
+});
+
 </script>
+
+// ==================== ROBUST INIT ENGINE ====================
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 7-Minute Workout App Initializing...");
+    
+    try {
+        // 1. Attach Workout Card Listeners
+        document.querySelectorAll('[data-workout-id]').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const id = card.getAttribute('data-workout-id');
+                console.log(`🎯 Workout selected: ${id}`);
+                selectWorkout(id);
+            });
+        });
+
+        // 2. Attach Settings Listeners
+        document.querySelectorAll('[data-action="settings"]').forEach(el => {
+            el.addEventListener('click', () => {
+                console.log("⚙️ Opening Settings");
+                openSettings();
+            });
+        });
+
+        document.querySelectorAll('[data-action="close-settings"]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                console.log("⚙️ Closing Settings");
+                closeSettings(e);
+            });
+        });
+
+        // 3. Attach Control Button Listeners
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            console.log("⏸ Toggle Pause");
+            togglePause();
+        });
+
+        document.querySelector('[data-action="skip"]').addEventListener('click', () => {
+            console.log("⏭ Skip Exercise");
+            skipExercise();
+        });
+
+        document.querySelector('[data-action="exit"]').addEventListener('click', () => {
+            console.log("🏠 Exit Workout");
+            exitWorkout();
+        });
+
+        document.querySelector('[data-action="home"]').addEventListener('click', () => {
+            console.log("🏠 Go Home");
+            goHome();
+        });
+
+        // 4. Attach Setting Adjustments
+        document.querySelectorAll('[data-adjust]').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-adjust');
+                const delta = parseInt(el.getAttribute('data-delta'));
+                console.log(`🛠 Adjusting ${key} by ${delta}`);
+                adjustSetting(key, delta);
+            });
+        });
+
+        document.querySelectorAll('[data-toggle]').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-toggle');
+                console.log(` toggling ${key}`);
+                toggleSetting(key);
+            });
+        });
+
+        console.log("✅ Initialization complete. App is ready!");
+
+    } catch (err) {
+        console.error("❌ FATAL INITIALIZATION ERROR:", err);
+        alert("The app failed to start. Please check the browser console for details.");
+    }
+});
+
 </script>
 
 </body>
